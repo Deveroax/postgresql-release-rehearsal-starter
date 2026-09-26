@@ -1,7 +1,37 @@
 # PostgreSQL release-rehearsal starter
 
-A small synthetic PostgreSQL release-rehearsal starter using Python's
-standard library, plain SQL and real PostgreSQL command-line tools.
+A practice range for database changes that fail: detect a missing constraint,
+prove a rollback, then apply a forward correction in a throwaway local PostgreSQL
+cluster. The rows are fictional pencils and notebooks, not production data.
+
+**Use it for:** learning how to prove both an expected failure and recovery before
+planning a real database release.
+**Not a migration framework:** it cannot target an existing database, and a passing
+rehearsal does not authorize production changes.
+
+```text
+source identity check (E) -> new private cluster
+  baseline (A) -> detect drift (B) -> prove rollback (C) -> correct forward (D)
+  -> verify shutdown and remove only this run's cluster
+```
+
+## Five-minute start: tests without a database
+
+With Python 3.9+ installed, run from this directory in a POSIX shell:
+
+```sh
+TEST_SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/pg-demo.XXXXXX")"
+REHEARSAL_TEST_SCRATCH="$TEST_SCRATCH" python3 -E -B -m unittest discover -s tests -v
+printf 'Test scratch: %s\n' "$TEST_SCRATCH"
+```
+
+This path needs no PostgreSQL installation and starts no server. It exercises
+source admission, isolation and failure classification with deterministic tests;
+it is not a real SQL rehearsal. For that, use the explicit PostgreSQL toolchain and
+run instructions below. See the [synthetic evidence example](EVIDENCE.md) for the
+result shape before running anything.
+
+## License and credit
 Licensed under [MIT](LICENSE). Copyright (c) 2026 Nic Richards.
 Deveroax — prepared with Hermes Agent assistance.
 See [attribution](ATTRIBUTION.md) for user-confirmed origin and license coverage.
