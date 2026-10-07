@@ -10,7 +10,7 @@ description: "Use when rehearsing synthetic PostgreSQL drift and forward correct
 Use this small example to learn source-bound migration checks, deliberate drift rejection,
 transaction rollback and a separately numbered correction. Do not use it to migrate an
 application, authorize production work, recover an unknown cluster or certify a release.
-It is a local review candidate, not an installed skill or a published package.
+It is a publicly available educational starter, not an installed agent skill or production migration package.
 
 ## Prerequisites and boundary
 

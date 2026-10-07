@@ -20,9 +20,12 @@ source identity check (E) -> new private cluster
 With Python 3.9+ installed, run from this directory in a POSIX shell:
 
 ```sh
-TEST_SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/pg-demo.XXXXXX")"
-REHEARSAL_TEST_SCRATCH="$TEST_SCRATCH" python3 -E -B -m unittest discover -s tests -v
-printf 'Test scratch: %s\n' "$TEST_SCRATCH"
+(
+  set -eu
+  TEST_SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/pg-demo.XXXXXX")"
+  REHEARSAL_TEST_SCRATCH="$TEST_SCRATCH" python3 -E -B -m unittest discover -s tests -v
+  printf 'Test scratch: %s\n' "$TEST_SCRATCH"
+)
 ```
 
 This path needs no PostgreSQL installation and starts no server. It exercises
@@ -62,21 +65,24 @@ Python 3.9+ is required. No packages are needed. Use an existing installation; a
 executables (`initdb`, `pg_ctl`, `psql`, `pg_controldata`, `postgres`) must be in one directory.
 Do not run as root. No Docker or service manager is used.
 
-From the candidate directory, choose approved existing directories (placeholders below):
+From the repository root, choose approved existing directories (placeholders below):
 
 ```sh
-PG_BIN=/absolute/path/to/postgresql/bin
-SCRATCH=/absolute/path/to/approved/short/scratch
-REVIEW=/absolute/path/to/private/review
+(
+  set -eu
+  PG_BIN=/absolute/path/to/postgresql/bin
+  SCRATCH=/absolute/path/to/approved/short/scratch
+  REVIEW=/absolute/path/to/private/review
 
-REHEARSAL_TEST_SCRATCH="$SCRATCH" python3 -E -B -m unittest discover -s tests -v
-python3 -E -B rehearsal.py manifest --output "$REVIEW/source-manifest.json"
-python3 -E -B rehearsal.py run   --manifest "$REVIEW/source-manifest.json"   --bin-dir "$PG_BIN" --scratch-root "$SCRATCH"   --evidence "$REVIEW/run-001"
+  REHEARSAL_TEST_SCRATCH="$SCRATCH" python3 -E -B -m unittest discover -s tests -v
+  python3 -E -B rehearsal.py manifest --output "$REVIEW/source-manifest.json"
+  python3 -E -B rehearsal.py run   --manifest "$REVIEW/source-manifest.json"   --bin-dir "$PG_BIN" --scratch-root "$SCRATCH"   --evidence "$REVIEW/run-001"
+)
 ```
 
 Create the private review directory first. The manifest and run evidence destinations must
 not exist already; preserve them and use new names on rerun. Keep the entire Unix socket
-pathname below 100 bytes. Scratch space must be outside the candidate. The harness
+pathname below 100 bytes. Scratch space must be outside the source tree. The harness
 uses a unique mode-0700 `pgr-*` directory beneath it; tests use `pgu-*` and the tamper
 probe uses `pgt-*`. Run Python with `-B` to avoid adding source-tree bytecode files;
 new unmanifested files intentionally invalidate source admission. `-E` ignores Python
@@ -111,7 +117,7 @@ Private `journal.jsonl` records command argv, SQL text/hash, exit status, stdout
 scenario boundaries, binary identities and cluster markers. `result.json` records the
 inventory and comparisons; `server.log` is copied before successful root removal.
 These are actual host-specific records, not public sample data. Keep them outside this
-candidate. `EVIDENCE.md` describes the format using an explicitly synthetic example.
+source tree. `EVIDENCE.md` describes the format using an explicitly synthetic example.
 
 Before removal the runner verifies marker/root/binary/offline/live identity, stops with
 the recorded `pg_ctl`, checks status 3 plus PID and socket absence and clean shutdown
